@@ -1,0 +1,75 @@
+{
+	address:table: 0x91e4b10,
+	id:0,
+	x:5,
+	y:5,
+	border_cell:table: 0x91ddf58,
+	board:
+	[
+		[
+			table: 0x91e0f70,
+			table: 0x91dd3c0,
+			table: 0x91d7d00,
+			table: 0x91dd4c8,
+			table: 0x91d8728
+		],
+		[
+			table: 0x91d7d70,
+			table: 0x91e2708,
+			table: 0x91dce30,
+			table: 0x91e2228,
+			table: 0x91dfb50
+		],
+		[
+			table: 0x91e1640,
+			table: 0x91ddb78,
+			table: 0x91e36d8,
+			table: 0x91e2c08,
+			table: 0x91e1848
+		],
+		[
+			table: 0x91dbd78,
+			table: 0x91de060,
+			table: 0x91e4de8,
+			table: 0x91de220,
+			table: 0x91e3fc0
+		],
+		[
+			table: 0x91e53c8,
+			table: 0x91e2588,
+			table: 0x91d6690,
+			table: 0x91d6708,
+			table: 0x91e3d28
+		]
+	],
+	region:
+	[
+		table: 0x91d9d28,
+	]
+}
+
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91e5f40, id:1, value:1}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91e5f40, id:1, value:1}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91e5f40, id:1, value:1}
+{table: 0x91e5f40, id:1, value:1}
+{table: 0x91e5f40, id:1, value:1}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
+{table: 0x91d8118, id:0, value:0}
