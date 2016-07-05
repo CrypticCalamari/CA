@@ -1,59 +1,55 @@
-local class_mt = {}
-local object_mt = {}
-local object_idx = {}
-local StateRule = setmetatable({}, class_mt)
+local class_mt = {
+	__call = function(class, ...)
+		return class.new(...)
+	end
+}
+local object_mt = {
+	__eq = function(left, right)
+		return left._id == right._id
+	end,
+	__tostring = function(object)
+		local fiber = "{"
+		return fiber
+	end
+}
+local object_idx = {
+	getId = function(self) return self._id end,
+	getState = function(self) return self._state end,
+	containsRuleFor = function(town_key)
+		if self._rules[town_key] then
+			return true
+		end
+		return false
+	end,
+	getRuleFor = function(town_key)
+		return self._rules[town_key]
+	end,
+	setRuleFor = function(town_key, rule)
+		self._rules[town_key] = rule
+	end,
+	getNewState = function(town_key)
+		if self._rules[town_key] then
+			return self._rules[town_key]:getNewState()
+		end
 
+		return nil
+	end
+}
+local StateRule = {
+	new = function(id, state)
+		local self = {}
+
+		self._address = tostring(self)
+		self._id = id
+		self._state = state
+		self._rules = {}		-- list of rules that cause a state change
+
+		setmetatable(self, object_mt)
+		return self
+	end
+}
 object_mt.__index = object_idx
-
-function class_mt.__call(class, ...)
-	return class.new(...)
-end
-function object_mt.__eq(left, right)
-	return left._id == right._id
-end
-function object_mt.__tostring(object)
-	local the_string = "{"
-
-	
-
-	return the_string
-end
-
-function object_idx:getId() return self._id end
-function object_idx:getState() return self._state end
-function object_idx:containsRuleFor(town_key)
-	if self._rule[town_key] then
-		return true
-	end
-	return false
-end
-function object_idx:getRuleFor(town_key)
-	return self._rule[town_key]
-end
-function object_idx:setRuleFor(town_key, rule)
-	self._rule[town_key] = rule
-end
-function object_idx:getNewState(town_key)
-	if self._rule[town_key] then
-		return self._rule[town_key]:getNewState()
-	end
-
-	return nil
-end
-
-function StateRule.new(id, state)
-	local self = {}
-
-	self._address = tostring(self)
-	self._id = id
-	self._state = state
-	self._rule = {}		-- list of rules that cause a state change
-
-	setmetatable(self, object_mt)
-
-	return self
-end
-
+setmetatable(StateRule, class_mt)
 return StateRule
 
 
