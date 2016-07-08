@@ -1,41 +1,62 @@
-local class_mt = {
+--[[/////////////////////////////////////
+//			Class: Metatable					//
+/////////////////////////////////////--]]
+local class_meta = {
 	__call = function(class, ...)
 		return class.new(...)
 	end
 }
-local object_mt = {
-	__eq = function(left, right)
-		return left._id == right._id
-	end,
-	__tostring = function(object)
-		fiber = "{"
-
-		fiber = fiber..object._address..", "
-		fiber = fiber.."id:"..object._id..", "
-		fiber = fiber.."value:"..object._value.."}"
-
-		return fiber
+--[[/////////////////////////////////////
+//			Object: Metatable					//
+/////////////////////////////////////--]]
+local object_meta = {
+	__tostring = function(o)
+		local t = {}
+		table.insert(t, "{id:")		table.insert(t, tostring(o._id))
+		table.insert(t, ",value:")	table.insert(t, tostring(o._value))
+		table.insert(t, "}")
+		return table.concat(t)
 	end
 }
+--[[/////////////////////////////////////
+//			Object: Function Index			//
+/////////////////////////////////////--]]
 local object_idx = {
 	getId = function(self) return self._id end,
 	getValue = function(self) return self._value end
 }
-local State = {
-	new = function(id, value)
-		local self = {}
+--[[/////////////////////////////////////
+//			Class: Table						//
+/////////////////////////////////////--]]
+local State = {}; setmetatable(State, class_meta)
+
+	State._states = {}
+	State.getStateById = function(id)
+		return State._states[id]
+	end
+	State.getStatesByValue = function(value)
+		local s = {}
+		for _,v in ipairs(State._states) do
+			if v._value == value then
+				table.insert(s, v)
+			end
+		end
+		return s
+	end
+	State.new = function(value)
+		local self = setmetatable({}, object_meta)
 	
-		self._address = tostring(self)
-		self._id = id
+		self._id = #State._states or 1
 		self._value = value
 	
-		setmetatable(self, object_mt)
-
+		State._states[self._id] = self
 		return self
 	end
-}
-object_mt.__index = object_idx
-setmetatable(State, class_mt)
+	State.ZERO = State(0)
+--[[/////////////////////////////////////
+//			Class: Other						//
+/////////////////////////////////////--]]
+object_meta.__index = object_idx
 return State
 
 

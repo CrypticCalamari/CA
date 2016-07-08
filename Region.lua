@@ -1,101 +1,101 @@
-local class_mt = {
+--[[/////////////////////////////////////
+//			Class: Metatable					//
+/////////////////////////////////////--]]
+local class_meta = {
 	__call = function(class, ...)
 		return class.new(...)
 	end
 }
-local object_mt = {
-	__eq = function(left, right)
-		return left._id == right._id
+--[[/////////////////////////////////////
+//			Object: Metatable					//
+/////////////////////////////////////--]]
+local object_meta = {
+	__call = function(o, state)
+		return self._state_rules[ state:getId() ]
 	end,
-	__tostring = function(object)
-		local fiber = "{"
-
-		fiber = fiber.."address:"..object._address..", "
-		fiber = fiber.."id:"..object._id..", "
-	-----------------------------
-		fiber = fiber.."region:["
-		for i,cell in ipairs(object._region) do
-			fiber = fiber..cell..", "
-		end
-		if string.sub(fiber, -2) == ", " then
-			fiber = string.sub(fiber, 1, #fiber-2)
-		end
-	-----------------------------
-		fiber = fiber.."], state_rule:["
-
-		for i,state_rule in ipairs(object._state_rule) do
-			fiber = fiber..state_rule..", "			-- TODO: overload __tostring in StateRule
-		end
-		if string.sub(fiber, -2) == ", " then
-			fiber = string.sub(fiber, 1, #fiber-2)
-		end
-	-----------------------------
-		fiber = fiber.."], state_town_key_gen:["
-
-		for i,state_town_key_gen in ipairs(object._state_town_key_gen) do
-			fiber = fiber..state_town_key_gen..", "
-		end
-		if string.sub(fiber, -2) == ", " then
-			fiber = string.sub(fiber, 1, #fiber-2)
-		end
-	-----------------------------
-		fiber = fiber.."]}"
-
-		return fiber
+	__tostring = function(o)
+		local t = {}
+		table.insert(t, "{id:")		table.insert(t, tostring(o._id))
+		table.insert(t, ",board:") table.insert(t, tostring(o._board._id))
+		table.insert(t, ",cells:[")				-- TODO: Finish this function
+		table.insert(t, ",state_rules:[")
+		table.insert(t, ",lock_types:[")
+		return table.concat(t)
 	end
 }
+--[[/////////////////////////////////////
+//			Object: Function Index			//
+/////////////////////////////////////--]]
 local object_idx = {
-	getId = function(self) return self._id end
 	contains = function(self, cell)
-		if self._region[cell:getId()] then
+		if self._cells[cell:getId()] then
 			return true
 		end
 		return false
 	end,
+	getId = function(self) return self._id end,
+	getStateRule = function(self, state)
+		if not self._state_rules[state:getId()] then
+			error("Find better way to handle nil _state_rules[state_id] in Region")
+		end
+		return self._state_rules[state:getId()]
+	end,
+	getLockType = function(self, state)
+		if not self._lock_types[state:getId()] then
+			error("Find better way to handle nil _lock_types[state_id] in Region")
+		end
+		return self._lock_types[state:getId()]
+	end,
 	addCell = function(self, cell)
-		self._region[cell:getId()] = cell
+		self._cells[cell:getId()] = cell
 	end,
 	removeCell = function(self, cell)
-		self._region[cell:getId()] = nil
+		self._cells[cell:getId()] = nil
 	end,
-	addStateRule = function(self, state_id, state_rule)
-		self._state_rule[state_id] = state_rule
+	setStateRule = function(self, state, state_rule)
+		self._state_rules[state:getId()] = state_rule
 	end,
-	removeStateRule = function(self, state_id)
-		self._state_rule[state_id] = nil
-	end,
-	addStateTownKeyGen = function(self, state_id, town_key_gen)
-		self._state_town_key_gen[state_id] = town_key_gen
-	end,
-	removeStateTownKeyGen = function(self, state_id)
-		self._state_town_key_gen[state_id] = nil
+	setLockType = function(self, state, town_locksmith)
+		self._lock_types[state:getId()] = town_locksmith
 	end,
 	updateNewState = function(self)
-		for k, cell in pairs(self._region) do
-			cell_state_id = cell:getState():getId()
-			town_key = self._state_town_key_gen[cell_state_id].getTownKey(cell)
-			new_state = self._state_rule[cell_state_id]:getNewState(town_key)
-
-			cell:setNewState(new_state or cell:getState())
+		for _,cell in pairs(self._cells) do
+			cell:updateNewState(self)
 		end
 	end
 }
-local Region = {
-	new = function(id)
-		local self = {}
+--[[/////////////////////////////////////
+//			Class: Table						//
+/////////////////////////////////////--]]
+local Region = {}
+	Region._regions = {}
+	Region.getRegionById = function(id)
+		return Region._regions[id]
+	end
+	Region.getRegionContainingCell = function(cell)
+		for _,r in ipairs(Region._regions) do
+			if r._cells[cell:getId()] then
+				return r
+			end
+		end
+	end
+	Region.new = function(board)
+		local self = setmetatable({}, object_meta)
 
-		self._address = tostring(self)
-		self._id = id
-		self._region = {}
-		self._state_rule = {}
-		self._state_town_key_gen = {}
+		self._id = #Region._regions or 1
+		self._board = board
+		self._cells = {}
+		self._state_rules = {}
+		self._lock_types = {}
 
-		setmetatable(self, object_mt)
+		Region._regions[self._id] = self
 		return self
 	end
-}
-object_mt.__index = object_idx
-setmetatable(Region, class_mt)
+--[[/////////////////////////////////////
+//			Class: Other						//
+/////////////////////////////////////--]]
+object_meta.__index = object_idx
+setmetatable(Region, class_meta)
 return Region
 
 
