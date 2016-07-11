@@ -46,13 +46,14 @@ local State = {}; setmetatable(State, class_meta)
 	State.new = function(value)
 		local self = setmetatable({}, object_meta)
 	
-		self._id = #State._states or 1
+		self._id = #State._states + 1
 		self._value = value
 	
 		State._states[self._id] = self
 		return self
 	end
 	State.ZERO = State(0)
+	State.ONE = State(1)
 --[[/////////////////////////////////////
 //			Class: Other						//
 /////////////////////////////////////--]]

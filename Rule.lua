@@ -6,46 +6,54 @@ local class_meta = {
 		return class.new(...)
 	end
 }
---[[/////////////////////////////////////
-//			Object: Metatable					//
-/////////////////////////////////////--]]
-local object_meta = {
-	__call = function(o)
-		return o._new_state
-	end,
-	__eq = function(left, right)
-		return left._town_key == right._town_key
-			and left._new_state == right._new_state
-	end,
-	__tostring = function(o)
-		local t = {}
-		table.insert(t, "{id:")				table.insert(t, tostring(o._id))
-		table.insert(t, ",town_key:")		table.insert(t, tostring(o._town_key))
-		table.insert(t, ",new_state:")	table.insert(t, tostring(o._new_state))
-		table.insert(t, "}")
-		return table.concat(t)
-	end
-}
+local Rule = {}
+setmetatable(Rule, class_meta)
 --[[/////////////////////////////////////
 //			Object: Function Index			//
 /////////////////////////////////////--]]
 local object_idx = {
-	getId = 			function(self) return self._id end,
-	getTownKey =	function(self) return self._town_key end,
-	getNewState =	function(self) return self._new_state end
+	getId = function(self) return self._id end,
+	getState = function(self) return self._state end
+}
+--[[/////////////////////////////////////
+//			Object: Metatable					//
+/////////////////////////////////////--]]
+local object_meta = {
+	__call = function(o, town_key)
+		return o:getNewState(town_key)
+	end,
+	__index = function(o, key)
+		return object_idx[key] or o._new_states[key]
+	end,
+	__newindex = function(o, town_key, new_state)
+		o._new_states[town_key] = new_state
+	end,
+	__tostring = function(o)
+		local t = {}
+		table.insert(t, "{id:")		table.insert(t, o._id)
+		table.insert(t, ",state:")	table.insert(t, tostring(o._state))
+		table.insert(t, ",new_states:[")
+
+		for _,v in pairs(o._new_states) do
+			table.insert(t, tostring(v)) table.insert(t, ",")
+		end
+
+		table.remove(t)
+		table.insert(t, "]}")
+		return table.concat(t)
+	end
 }
 --[[/////////////////////////////////////
 //			Class: Table						//
 /////////////////////////////////////--]]
-local Rule = {}
 	Rule._rules = {}
 	Rule.getRuleById = function(id)
 		return Rule._rules[id]
 	end
-	Rule.getRulesByTownKey = function(town_key)
+	Rule.getRulesByState = function(state)
 		local r = {}
 		for _,v in ipairs(Rule._rules) do
-			if v._town_key == town_key then
+			if v._state == state then
 				table.insert(r, v)
 			end
 		end
@@ -53,29 +61,33 @@ local Rule = {}
 	end
 	Rule.getRulesByNewState = function(new_state)
 		local r = {}
-		for _,v in ipairs(Rule._rules) do
-			if v._new_state == new_state then
-				table.insert(r, v)
+		for i,v in ipairs(Rule._rules) do
+			print(i)
+			for _,ns in pairs(v._new_states) do
+				if ns == new_state then
+					table.insert(r, v)
+					break
+				end
 			end
 		end
 		return r
 	end
-	Rule.new = function(town_key, new_state)
-		local self = setmetatable({}, object_meta)
+	Rule.new = function(state)
+		local self = {}
 
-		self._id = #Rule._rules or 1
-		self._town_key = town_key
-		self._new_state = new_state
-	
+		self._id = #Rule._rules + 1
+		self._state = state
+		self._new_states = {}
+
 		Rule._rules[self._id] = self
+		setmetatable(self, object_meta)
 		return self
 	end
 --[[/////////////////////////////////////
 //			Class: Other						//
 /////////////////////////////////////--]]
-object_meta.__index = object_idx
-setmetatable(Rule, class_meta)
 return Rule
+
 
 
 
