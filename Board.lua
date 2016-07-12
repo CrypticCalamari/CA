@@ -30,6 +30,7 @@ local object_idx = {
 	getId =		function(self) return self._id end,
 	getSize =	function(self) return self._size end,
 	getCell =	function(self, point)
+		--[[
 		local cursor = self._cells
 		for i, p in point() do
 			if p < 1 or p > self._size[i] then
@@ -38,7 +39,26 @@ local object_idx = {
 				cursor = cursor[p]
 			end
 		end
+
 		return cursor
+		--]]
+		-- [[ Potential refactoring to a flat array
+		local m = self._size[#point]
+		local s = point[#point]
+
+		for i = 1,#point do
+			if point[i] < 1 or point[i] > self._size[i] then
+				return self._border_cell
+			end
+		end
+
+		for i = 1,#point-1 do
+			s = s + ((point[#point-i]-1) * m)
+			m = m * self._size[#point-i]
+		end
+		
+		return self._cells[s]
+		-- ]]
 	end,
 	setState =	function(self, point, state)
 		self:getCell(point):setState(state)
@@ -81,7 +101,7 @@ local Board = {}
 
 		table.insert(self._regions, default_region)
 
-		-- create Board
+		--[[ create Board
 		local function boardTree(parent, depth, parent_address, dimensions)
 			for i = 1, dimensions[depth] do
 				local p = parent_address:copy()
@@ -111,6 +131,28 @@ local Board = {}
 			end
 		end
 		createTowns(self._cells)
+		--]]
+		-- [[ Potential refactoring to a flat array
+		local function aTree(tree, size, depth, point)
+			for i = 1,size[depth] do
+				local p = point:copy()
+				p:push(i)
+
+				if depth < #size then
+					aTree(tree, size, depth + 1, p)
+				else
+					table.insert(tree, Cell(p, State.ZERO))
+				end
+			end
+		end
+		aTree(self._cells, self._size, 1, Point())
+
+		-- Setup Town for each cell
+		for _,c in ipairs(self._cells) do
+			local town = Town(town_builder, self, c:getPoint())
+			c:setTown( town )
+		end
+		-- ]]
 
 		Board._boards[self._id] = self
 		return self

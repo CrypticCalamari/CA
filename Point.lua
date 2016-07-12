@@ -30,6 +30,9 @@ local object_idx = {
 	push = function(self, new_dim)
 		table.insert(self._point, new_dim)
 	end,
+	pushFront = function(self, new_dim)
+		table.insert(self._point, 1, new_dim)
+	end,
 	pop = function(self)
 		return table.remove(self._point)
 	end
