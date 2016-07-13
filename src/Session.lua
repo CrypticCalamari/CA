@@ -1,9 +1,9 @@
-local class_mt = {
+local class_meta = {
 	__call = function(class, ...)
 		return class.new(...)
 	end
 }
-local object_mt = {
+local object_meta = {
 	
 }
 local object_idx = {
@@ -11,9 +11,9 @@ local object_idx = {
 		
 	end
 }
-local Session = {
-	new = function(name)
-		local self = {}
+local Session = {}
+	Session.new = function(name)
+		local self = setmetatable({}, object_meta)
 
 		self._name = name
 		self._directory = nil
@@ -21,16 +21,16 @@ local Session = {
 		self._undo_stack = {}
 		self._redo_stack = {}
 
-		setmetatable(self, object_mt)
 		return self
-	end,
-	load = function(name)
+	end
+	Session.loadSession = function(name)
 
-	end,
-	EXTENSION = ".cax"
-}
-object.__index = object_idx
-setmetatable(Session, class_mt)
+	end
+	Session.EXTENSION = ".cax"
+
+object_meta.__index = object_idx
+setmetatable(Session, class_meta)
+
 return Session
 
 
