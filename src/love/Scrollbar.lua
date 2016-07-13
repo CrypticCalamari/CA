@@ -1,0 +1,3 @@
+local Scrollbar = {}
+
+return Scrollbar
